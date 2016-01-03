@@ -3,7 +3,7 @@
 {-# LANGUAGE LambdaCase #-}
 
 module CRDT.TreeVector.Internal (
-  DChar(..),
+  Element(..),
   get,
 
   Node(..),
@@ -28,19 +28,19 @@ import           CRDT.TreeVector.Internal.Edit
 
 -- * characters
 
-data DChar
-  = DChar Char
+data Element
+  = Set Char
   | Deleted
   deriving (Show, Eq, Generic, Typeable)
 
-instance Semigroup DChar where
+instance Semigroup Element where
   Deleted <> _ = Deleted
   _ <> Deleted = Deleted
-  DChar a <> DChar b = DChar (max a b)
+  Set a <> Set b = Set (max a b)
 
-get :: DChar -> String
+get :: Element -> String
 get = \ case
-  DChar c -> [c]
+  Set c -> [c]
   Deleted -> ""
 
 -- * trees
@@ -50,7 +50,7 @@ data Client
   deriving (Show, Eq, Ord, Generic)
 
 data Node
-  = Node TreeVector DChar TreeVector
+  = Node TreeVector Element TreeVector
   deriving (Show, Eq, Generic, Typeable)
 
 instance Semigroup Node where
@@ -58,7 +58,7 @@ instance Semigroup Node where
     Node (l1 <> l2) (c1 <> c2) (r1 <> r2)
 
 mkNode :: Char -> Node
-mkNode c = Node mempty (DChar c) mempty
+mkNode c = Node mempty (Set c) mempty
 
 getNodeDoc :: Node -> String
 getNodeDoc (Node left c right) =
@@ -115,7 +115,7 @@ mkPatch client tree s =
         Node (treeAdd left edit) c right
       | index edit == treeLength left =
         case c of
-          DChar _ ->
+          Set _ ->
             case edit of
               Delete _ ->
                 Node left Deleted right

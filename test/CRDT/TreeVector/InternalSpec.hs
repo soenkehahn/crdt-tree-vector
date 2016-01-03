@@ -23,7 +23,7 @@ import           Test.Utils
 
 spec :: Spec
 spec = do
-  isSemigroup (Proxy :: Proxy DChar)
+  isSemigroup (Proxy :: Proxy Element)
   isSemigroup (Proxy :: Proxy Node)
 
   describe "TreeVector" $ do
@@ -62,15 +62,15 @@ spec = do
         counterexample (show (diff (getVector tree) s)) $
         getVector (tree <> mkPatch (Client 1) tree s) === s
 
-instance Arbitrary DChar where
+instance Arbitrary Element where
   arbitrary = oneof $
-    (DChar <$> arbitrary) :
+    (Set <$> arbitrary) :
     pure Deleted :
     []
-  shrink Deleted = map DChar ['a' .. 'z']
-  shrink (DChar c) = map DChar $ shrink c
+  shrink Deleted = map Set ['a' .. 'z']
+  shrink (Set c) = map Set $ shrink c
 
-instance EqProp DChar where
+instance EqProp Element where
   a =-= b = get a === get b
 
 instance Arbitrary Client where
