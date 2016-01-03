@@ -22,7 +22,7 @@ import qualified Data.Map as Map
 import           Data.Semigroup hiding (diff)
 import           GHC.Generics
 
-import CRDT.TreeVector.Internal.Diff
+import           CRDT.TreeVector.Internal.Edit
 
 -- * characters
 
@@ -88,14 +88,14 @@ update :: Client -> Tree -> String -> Tree
 update client tree s =
   foldl' treeAdd tree (diff (getDocument tree) s)
   where
-    treeAdd :: Tree -> Edit Char -> Tree
+    treeAdd :: Tree -> Edit -> Tree
     treeAdd (Tree tree) edit = Tree $ Map.fromList $ mapAdd (toAscList tree) edit
 
     mapAdd [] (Insert 0 c) = [(client, mkNode c)]
     mapAdd [(client, sub)] edit = [(client, nodeAdd sub edit)]
     mapAdd m edit = mapAddMult m edit
 
-    mapAddMult :: [(Client, Node)] -> Edit Char -> [(Client, Node)]
+    mapAddMult :: [(Client, Node)] -> Edit -> [(Client, Node)]
     mapAddMult [(client, node)] edit=
       [(client, nodeAdd node edit)]
     mapAddMult ((client, a) : r) edit
@@ -106,7 +106,7 @@ update client tree s =
     mapAddMult [] (Insert 0 _) = error "hole" -- fixme
     mapAddMult m x = error $ show ("mapAddMult", m, x)
 
-    nodeAdd :: Node -> Edit Char -> Node
+    nodeAdd :: Node -> Edit -> Node
     nodeAdd (Node left c right) edit
       | index edit < treeLength left =
         Node (treeAdd left edit) c right
@@ -114,16 +114,16 @@ update client tree s =
         case c of
           DChar _ ->
             case edit of
-              Delete _ _ -> Node left Deleted right
-              Insert _ new ->
+              Delete _ ->
+                Node left Deleted right
+              Insert _ _ ->
                 Node (treeAdd left edit) c right
-              x -> error $ show ("nodeAdd", x)
           Deleted ->
             case edit of
               Insert _ new ->
                 Node left c (treeAdd right (Insert 0 new))
-              Delete _ old ->
-                Node left c (treeAdd right (Delete 0 old))
+              Delete _ ->
+                Node left c (treeAdd right (Delete 0))
       | index edit > treeLength left =
         Node left c (treeAdd right (modIndex (subtract (treeLength left + length (get c))) edit))
     nodeAdd n e = error $ show ("nodeAdd", n, e)
