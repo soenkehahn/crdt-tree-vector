@@ -18,7 +18,9 @@ library
     , containers
     , vector
   exposed-modules:
+      CRDT.TreeVector
       CRDT.TreeVector.Internal
+      CRDT.TreeVector.Internal.Diff
   default-language: Haskell2010
 
 test-suite spec
@@ -42,5 +44,7 @@ test-suite spec
   other-modules:
       CRDT.TreeVector.InternalSpec
       Test.Utils
+      CRDT.TreeVector
       CRDT.TreeVector.Internal
+      CRDT.TreeVector.Internal.Diff
   default-language: Haskell2010

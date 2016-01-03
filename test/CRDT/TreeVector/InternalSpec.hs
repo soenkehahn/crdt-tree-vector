@@ -54,7 +54,7 @@ spec = do
     it "can create patch documents" $ do
       property $ \ tree s ->
         counterexample (show (getDocument tree)) $
-        counterexample (show (diff tree s)) $
+        counterexample (show (diff (getDocument tree) s)) $
         getDocument (tree <> update (Client 1) tree s) === s
 
 instance Arbitrary DChar where
