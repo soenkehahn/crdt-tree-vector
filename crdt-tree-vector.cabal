@@ -36,6 +36,7 @@ test-suite spec
     , semigroups
     , containers
     , vector
+    , base-compat
     , hspec
     , QuickCheck
     , checkers

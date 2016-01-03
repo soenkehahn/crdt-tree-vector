@@ -5,6 +5,9 @@
 
 module CRDT.TreeVector.InternalSpec where
 
+import           Prelude ()
+import           Prelude.Compat
+
 import           "quickcheck-instances" Test.QuickCheck.Instances ()
 import           Data.Proxy
 import           Data.Semigroup hiding (diff)
