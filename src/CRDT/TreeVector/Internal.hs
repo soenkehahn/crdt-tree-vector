@@ -9,10 +9,10 @@ module CRDT.TreeVector.Internal (
   getNodeDoc,
 
   Client(..),
-  Tree(..),
-  getDocument,
+  TreeVector(..),
+  getVector,
 
-  update,
+  mkPatch,
   diff,
 ) where
 
@@ -48,7 +48,7 @@ data Client
   deriving (Show, Eq, Ord, Generic)
 
 data Node
-  = Node Tree DChar Tree
+  = Node TreeVector DChar TreeVector
   deriving (Show, Eq, Generic)
 
 instance Semigroup Node where
@@ -60,36 +60,37 @@ mkNode c = Node mempty (DChar c) mempty
 
 getNodeDoc :: Node -> String
 getNodeDoc (Node left c right) =
-  getDocument left ++ get c ++ getDocument right
+  getVector left ++ get c ++ getVector right
 
 nodeLength :: Node -> Int
 nodeLength = length . getNodeDoc
 
-data Tree
-  = Tree (Map Client Node)
+data TreeVector
+  = TreeVector (Map Client Node)
   deriving (Show, Eq, Generic)
 
-instance Semigroup Tree where
-  Tree a <> Tree b =
-    Tree $ unionWith (<>) a b
+instance Semigroup TreeVector where
+  TreeVector a <> TreeVector b =
+    TreeVector $ unionWith (<>) a b
 
-instance Monoid Tree where
+instance Monoid TreeVector where
   mappend = (<>)
-  mempty = Tree mempty
+  mempty = TreeVector mempty
 
-getDocument :: Tree -> String
-getDocument (Tree m) =
+getVector :: TreeVector -> String
+getVector (TreeVector m) =
   concatMap (getNodeDoc . snd) $ toAscList m
 
-treeLength :: Tree -> Int
-treeLength = length . getDocument
+treeLength :: TreeVector -> Int
+treeLength = length . getVector
 
-update :: Client -> Tree -> String -> Tree
-update client tree s =
-  foldl' treeAdd tree (diff (getDocument tree) s)
+mkPatch :: Client -> TreeVector -> String -> TreeVector
+mkPatch client tree s =
+  foldl' treeAdd tree (diff (getVector tree) s)
   where
-    treeAdd :: Tree -> Edit -> Tree
-    treeAdd (Tree tree) edit = Tree $ Map.fromList $ mapAdd (toAscList tree) edit
+    treeAdd :: TreeVector -> Edit -> TreeVector
+    treeAdd (TreeVector tree) edit = TreeVector $
+      Map.fromList $ mapAdd (toAscList tree) edit
 
     mapAdd [] (Insert 0 c) = [(client, mkNode c)]
     mapAdd [(client, sub)] edit = [(client, nodeAdd sub edit)]

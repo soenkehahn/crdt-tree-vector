@@ -14,6 +14,7 @@ import           Test.QuickCheck
 import           Test.QuickCheck.Checkers
 import           Test.QuickCheck.Classes
 
+import           CRDT.TreeVector ()
 import           CRDT.TreeVector.Internal
 import           Test.Utils
 
@@ -22,41 +23,41 @@ spec = do
   isSemigroup (Proxy :: Proxy DChar)
   isSemigroup (Proxy :: Proxy Node)
 
-  describe "Tree" $ do
-    isSemigroup (Proxy :: Proxy Tree)
-    testBatch (monoid (undefined :: Tree))
+  describe "TreeVector" $ do
+    isSemigroup (Proxy :: Proxy TreeVector)
+    testBatch (monoid (undefined :: TreeVector))
 
     it "joins are commutative" $ do
-      property $ \ (a :: Tree) b ->
+      property $ \ (a :: TreeVector) b ->
         a <> b === b <> a
 
-  describe "update" $ do
+  describe "mkPatch" $ do
     it "can create concurrent patches for two clients" $ do
       let initial = mempty
-          patchA = update (Client 1) initial "abc"
-          patchB = update (Client 2) initial "xyz"
-      getDocument (patchA <> patchB) `shouldBe` "abcxyz"
+          patchA = mkPatch (Client 1) initial "abc"
+          patchB = mkPatch (Client 2) initial "xyz"
+      getVector (patchA <> patchB) `shouldBe` "abcxyz"
 
     it "can create concurrent deletions for two clients" $ do
       let initial = mempty
-          patchA = update (Client 1) initial "abc"
-          patchB = update (Client 1) patchA "ab"
-          patchC = update (Client 2) initial "xyz"
-      getDocument (patchB <> patchC) `shouldBe` "abxyz"
+          patchA = mkPatch (Client 1) initial "abc"
+          patchB = mkPatch (Client 1) patchA "ab"
+          patchC = mkPatch (Client 2) initial "xyz"
+      getVector (patchB <> patchC) `shouldBe` "abxyz"
 
     it "can create concurrent deletions for two clients" $ do
       let initial = mempty
-          patchA = update (Client 1) initial "abc"
-          patchB = update (Client 2) initial "xyz"
+          patchA = mkPatch (Client 1) initial "abc"
+          patchB = mkPatch (Client 2) initial "xyz"
           patchC = patchA <> patchB
-          patchD = update (Client 1) patchC "abxz"
-      getDocument (patchB <> patchD) `shouldBe` "abxz"
+          patchD = mkPatch (Client 1) patchC "abxz"
+      getVector (patchB <> patchD) `shouldBe` "abxz"
 
     it "can create patch documents" $ do
       property $ \ tree s ->
-        counterexample (show (getDocument tree)) $
-        counterexample (show (diff (getDocument tree) s)) $
-        getDocument (tree <> update (Client 1) tree s) === s
+        counterexample (show (getVector tree)) $
+        counterexample (show (diff (getVector tree) s)) $
+        getVector (tree <> mkPatch (Client 1) tree s) === s
 
 instance Arbitrary DChar where
   arbitrary = oneof $
@@ -84,9 +85,9 @@ instance Arbitrary Node where
 instance EqProp Node where
   a =-= b = getNodeDoc a === getNodeDoc b
 
-instance Arbitrary Tree where
-  arbitrary = Tree <$> arbitrary
-  shrink (Tree m) = map Tree $ shrink m
+instance Arbitrary TreeVector where
+  arbitrary = TreeVector <$> arbitrary
+  shrink (TreeVector m) = map TreeVector $ shrink m
 
-instance EqProp Tree where
-  a =-= b = getDocument a === getDocument b
+instance EqProp TreeVector where
+  a =-= b = getVector a === getVector b

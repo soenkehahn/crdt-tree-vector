@@ -1,9 +1,9 @@
 
 module CRDT.TreeVector (
-  Tree,
-  getDocument,
+  TreeVector,
+  getVector,
   Client(..),
-  update,
+  mkPatch,
 ) where
 
 import           CRDT.TreeVector.Internal
