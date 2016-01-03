@@ -28,20 +28,20 @@ import           CRDT.TreeVector.Internal.Edit
 
 -- * characters
 
-data Element
-  = Set Char
+data Element a
+  = Set a
   | Deleted
   deriving (Show, Eq, Generic, Typeable)
 
-instance Semigroup Element where
+instance Ord a => Semigroup (Element a) where
   Deleted <> _ = Deleted
   _ <> Deleted = Deleted
   Set a <> Set b = Set (max a b)
 
-get :: Element -> String
+get :: Element a -> [a]
 get = \ case
   Set c -> [c]
-  Deleted -> ""
+  Deleted -> []
 
 -- * trees
 
@@ -50,7 +50,7 @@ data Client
   deriving (Show, Eq, Ord, Generic)
 
 data Node
-  = Node TreeVector Element TreeVector
+  = Node TreeVector (Element Char) TreeVector
   deriving (Show, Eq, Generic, Typeable)
 
 instance Semigroup Node where

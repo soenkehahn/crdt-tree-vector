@@ -1,3 +1,4 @@
+{-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE PackageImports #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 
@@ -23,7 +24,7 @@ import           Test.Utils
 
 spec :: Spec
 spec = do
-  isSemigroup (Proxy :: Proxy Element)
+  isSemigroup (Proxy :: Proxy (Element Char))
   isSemigroup (Proxy :: Proxy Node)
 
   describe "TreeVector" $ do
@@ -62,7 +63,7 @@ spec = do
         counterexample (show (diff (getVector tree) s)) $
         getVector (tree <> mkPatch (Client 1) tree s) === s
 
-instance Arbitrary Element where
+instance Arbitrary (Element Char) where
   arbitrary = oneof $
     (Set <$> arbitrary) :
     pure Deleted :
@@ -70,7 +71,7 @@ instance Arbitrary Element where
   shrink Deleted = map Set ['a' .. 'z']
   shrink (Set c) = map Set $ shrink c
 
-instance EqProp Element where
+instance EqProp (Element Char) where
   a =-= b = get a === get b
 
 instance Arbitrary Client where
