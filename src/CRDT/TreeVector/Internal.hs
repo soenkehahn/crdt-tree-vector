@@ -92,7 +92,6 @@ update client tree s =
     mapAdd [] (P.Insert 0 c) = [(client, mkNode c)]
     mapAdd [(client, sub)] edit = [(client, nodeAdd sub edit)]
     mapAdd m edit = mapAddMult m edit
-    mapAdd m e = error $ show ("mapAdd", m, e)
 
     mapAddMult :: [(Client, Node)] -> P.Edit Char -> [(Client, Node)]
     mapAddMult [(client, node)] edit=
