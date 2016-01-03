@@ -1,7 +1,7 @@
 {-# LANGUAGE PackageImports #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 
-module CharSpec where
+module CRDT.TreeVector.InternalSpec where
 
 import           "quickcheck-instances" Test.QuickCheck.Instances
 import           Data.Proxy
@@ -13,8 +13,8 @@ import           Test.QuickCheck
 import           Test.QuickCheck.Checkers
 import           Test.QuickCheck.Classes
 
-import           Char
-import           Utils
+import           CRDT.TreeVector.Internal
+import           Test.Utils
 
 spec :: Spec
 spec = do

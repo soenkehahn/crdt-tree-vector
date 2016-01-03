@@ -1,7 +1,7 @@
 {-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE LambdaCase #-}
 
-module Char (
+module CRDT.TreeVector.Internal (
   DChar(..),
   get,
 

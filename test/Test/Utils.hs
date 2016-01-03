@@ -1,6 +1,6 @@
 {-# LANGUAGE ScopedTypeVariables #-}
 
-module Utils where
+module Test.Utils where
 
 import           Data.Proxy
 import           Data.Semigroup
