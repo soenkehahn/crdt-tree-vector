@@ -1,0 +1,44 @@
+-- This file has been generated from package.yaml by hpack version 0.8.0.
+--
+-- see: https://github.com/sol/hpack
+
+name:           crdt-tree-vector
+version:        0.0.0
+build-type:     Simple
+cabal-version:  >= 1.10
+
+library
+  hs-source-dirs:
+      src
+  build-depends:
+      base
+    , patches-vector
+    , semigroups
+    , containers
+    , vector
+  exposed-modules:
+      Char
+  default-language: Haskell2010
+
+test-suite spec
+  type: exitcode-stdio-1.0
+  main-is: Spec.hs
+  hs-source-dirs:
+      test
+    , src
+  build-depends:
+      base
+    , patches-vector
+    , semigroups
+    , containers
+    , vector
+    , hspec
+    , QuickCheck
+    , checkers
+    , hspec-checkers
+    , quickcheck-instances
+  other-modules:
+      CharSpec
+      Utils
+      Char
+  default-language: Haskell2010
