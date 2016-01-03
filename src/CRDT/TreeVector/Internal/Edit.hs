@@ -12,25 +12,25 @@ import qualified Data.Patch as P
 import qualified Data.Vector as V
 import           GHC.Generics
 
-data Edit
-  = Insert Int Char
+data Edit a
+  = Insert Int a
   | Delete Int
   deriving (Show, Eq, Generic)
 
-index :: Edit -> Int
+index :: Edit a -> Int
 index = \ case
   Insert i _ -> i
   Delete i -> i
 
-modIndex :: (Int -> Int) -> Edit -> Edit
+modIndex :: (Int -> Int) -> Edit a -> Edit a
 modIndex f = \ case
   Insert i c -> Insert (f i) c
   Delete i -> Delete (f i)
 
-diff :: String -> String -> [Edit]
-diff tree s =
+diff :: Eq a => [a] -> [a] -> [Edit a]
+diff a b =
   updateIndices 0 $ P.toList $
-  P.diff (V.fromList tree) (V.fromList s)
+  P.diff (V.fromList a) (V.fromList b)
   where
     updateIndices offset (P.Insert i c : r) =
       Insert (offset + i) c : updateIndices (succ offset) r

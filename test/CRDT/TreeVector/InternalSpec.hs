@@ -25,14 +25,14 @@ import           Test.Utils
 spec :: Spec
 spec = do
   isSemigroup (Proxy :: Proxy (Element Char))
-  isSemigroup (Proxy :: Proxy Node)
+  isSemigroup (Proxy :: Proxy (Node Char))
 
   describe "TreeVector" $ do
-    isSemigroup (Proxy :: Proxy TreeVector)
-    testBatch (monoid (undefined :: TreeVector))
+    isSemigroup (Proxy :: Proxy (TreeVector Char))
+    testBatch (monoid (undefined :: TreeVector Char))
 
     it "joins are commutative" $ do
-      property $ \ (a :: TreeVector) b ->
+      property $ \ (a :: TreeVector Char) b ->
         a <> b === b <> a
 
   describe "mkPatch" $ do
@@ -58,7 +58,7 @@ spec = do
       getVector (patchB <> patchD) `shouldBe` "abxz"
 
     it "can create patch documents" $ do
-      property $ \ tree s ->
+      property $ \ (tree :: TreeVector Char) s ->
         counterexample (show (getVector tree)) $
         counterexample (show (diff (getVector tree) s)) $
         getVector (tree <> mkPatch (Client 1) tree s) === s
@@ -78,7 +78,7 @@ instance Arbitrary Client where
   arbitrary = Client <$> elements [0 .. 10]
   shrink (Client c) = map Client $ shrink c
 
-instance Arbitrary Node where
+instance Arbitrary (Node Char) where
   arbitrary = scale (`div` 9)
     (Node <$> arbitrary <*> arbitrary <*> arbitrary)
   shrink (Node l c r) =
@@ -86,12 +86,12 @@ instance Arbitrary Node where
     (map (\ c' -> Node l c' r) (shrink c)) ++
     (map (\ r' -> Node l c r') (shrink r))
 
-instance EqProp Node where
-  a =-= b = getNodeDoc a === getNodeDoc b
+instance EqProp (Node Char) where
+  a =-= b = getNodeVector a === getNodeVector b
 
-instance Arbitrary TreeVector where
+instance Arbitrary (TreeVector Char) where
   arbitrary = TreeVector <$> arbitrary
   shrink (TreeVector m) = map TreeVector $ shrink m
 
-instance EqProp TreeVector where
+instance EqProp (TreeVector Char) where
   a =-= b = getVector a === getVector b
