@@ -1,5 +1,9 @@
 dependencies:
   - base
+  - patches-vector
+  - semigroups
+  - containers
+  - vector
 
 library:
   source-dirs:
@@ -13,3 +17,7 @@ tests:
       - src
     dependencies:
       - hspec
+      - QuickCheck
+      - checkers
+      - hspec-checkers
+      - quickcheck-instances
