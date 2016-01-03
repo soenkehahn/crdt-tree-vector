@@ -10,6 +10,7 @@ cabal-version:  >= 1.10
 library
   hs-source-dirs:
       src
+  ghc-options: -Wall -fno-warn-name-shadowing
   build-depends:
       base
     , patches-vector
@@ -17,7 +18,7 @@ library
     , containers
     , vector
   exposed-modules:
-      Char
+      CRDT.TreeVector.Internal
   default-language: Haskell2010
 
 test-suite spec
@@ -26,6 +27,7 @@ test-suite spec
   hs-source-dirs:
       test
     , src
+  ghc-options: -Wall -fno-warn-name-shadowing
   build-depends:
       base
     , patches-vector
@@ -38,7 +40,7 @@ test-suite spec
     , hspec-checkers
     , quickcheck-instances
   other-modules:
-      CharSpec
-      Utils
-      Char
+      CRDT.TreeVector.InternalSpec
+      Test.Utils
+      CRDT.TreeVector.Internal
   default-language: Haskell2010

@@ -5,6 +5,9 @@ dependencies:
   - containers
   - vector
 
+ghc-options:
+  -Wall -fno-warn-name-shadowing
+
 library:
   source-dirs:
     - src
