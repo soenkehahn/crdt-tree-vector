@@ -1,14 +1,15 @@
 {-# LANGUAGE PackageImports #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 
+{-# OPTIONS_GHC -fno-warn-orphans #-}
+
 module CRDT.TreeVector.InternalSpec where
 
-import           "quickcheck-instances" Test.QuickCheck.Instances
+import           "quickcheck-instances" Test.QuickCheck.Instances ()
 import           Data.Proxy
 import           Data.Semigroup hiding (diff)
 import           Test.Hspec
 import           Test.Hspec.Checkers
-import           Test.Hspec.QuickCheck
 import           Test.QuickCheck
 import           Test.QuickCheck.Checkers
 import           Test.QuickCheck.Classes
