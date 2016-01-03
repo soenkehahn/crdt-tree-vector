@@ -20,6 +20,7 @@ import           Data.List
 import           Data.Map (Map, toAscList, unionWith)
 import qualified Data.Map as Map
 import           Data.Semigroup hiding (diff)
+import           Data.Typeable
 import           GHC.Generics
 
 import           CRDT.TreeVector.Internal.Edit
@@ -29,7 +30,7 @@ import           CRDT.TreeVector.Internal.Edit
 data DChar
   = DChar Char
   | Deleted
-  deriving (Show, Eq, Generic)
+  deriving (Show, Eq, Generic, Typeable)
 
 instance Semigroup DChar where
   Deleted <> _ = Deleted
@@ -49,7 +50,7 @@ data Client
 
 data Node
   = Node TreeVector DChar TreeVector
-  deriving (Show, Eq, Generic)
+  deriving (Show, Eq, Generic, Typeable)
 
 instance Semigroup Node where
   (Node l1 c1 r1) <> (Node l2 c2 r2) =
@@ -67,7 +68,7 @@ nodeLength = length . getNodeDoc
 
 data TreeVector
   = TreeVector (Map Client Node)
-  deriving (Show, Eq, Generic)
+  deriving (Show, Eq, Generic, Typeable)
 
 instance Semigroup TreeVector where
   TreeVector a <> TreeVector b =
