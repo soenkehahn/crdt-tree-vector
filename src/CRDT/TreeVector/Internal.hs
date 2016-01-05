@@ -1,7 +1,10 @@
 {-# LANGUAGE DeriveDataTypeable #-}
 {-# LANGUAGE DeriveGeneric #-}
+{-# LANGUAGE GADTs #-}
+{-# LANGUAGE InstanceSigs #-}
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE ScopedTypeVariables #-}
+{-# LANGUAGE TypeFamilies #-}
 
 module CRDT.TreeVector.Internal (
   Element(..),
@@ -10,28 +13,27 @@ module CRDT.TreeVector.Internal (
   Node(..),
   getNodeVector,
 
-  Client(..),
   TreeVector(..),
   getVector,
 
-  mkPatch,
   diff,
 ) where
 
-import           Data.List
+import           Data.Foldable
 import           Data.Map (Map, toAscList, unionWith)
 import qualified Data.Map as Map
 import           Data.Semigroup hiding (diff)
 import           Data.Typeable
 import           GHC.Generics
 
+import           CRDT.Class
 import           CRDT.TreeVector.Internal.Edit
 
 -- * characters
 
-data Element a
-  = Set a
-  | Deleted
+data Element a where
+  Set :: a -> Element a
+  Deleted :: Element a
   deriving (Show, Eq, Generic, Typeable)
 
 instance Ord a => Semigroup (Element a) where
@@ -44,11 +46,23 @@ get = \ case
   Set c -> [c]
   Deleted -> []
 
--- * trees
+-- fixme
+{- instance (Show a, Ord a) => CRDT (Element a) where
+  type External (Element a) = Maybe a
 
-data Client
-  = Client Integer
-  deriving (Show, Eq, Ord, Generic)
+
+  mkPatch _ (Set old) (Just new)
+    | old == new = Right $ Set old
+  mkPatch _ (Set _) Nothing = Right Deleted
+  mkPatch _ Deleted Nothing = Right Deleted
+  mkPatch _ (Set _) (Just _) = Left "cannot change Element" -- fixme
+  mkPatch _ Deleted _ = Left "cannot un-delete Element" -- fixme
+
+  score = \ case
+    Set _ -> 0
+    Deleted -> 1 -}
+
+-- * trees
 
 data Node a
   = Node (TreeVector a) (Element a) (TreeVector a)
@@ -61,11 +75,11 @@ instance Ord a => Semigroup (Node a) where
 mkNode :: Ord a => a -> Node a
 mkNode c = Node mempty (Set c) mempty
 
-getNodeVector :: Node a -> [a]
+getNodeVector :: (Show a, Ord a) => Node a -> [a]
 getNodeVector (Node left c right) =
-  getVector left ++ get c ++ getVector right
+  getVector left ++ toList (get c) ++ getVector right
 
-nodeLength :: Node a -> Int
+nodeLength :: (Show a, Ord a) => Node a -> Int
 nodeLength = length . getNodeVector
 
 data TreeVector a
@@ -80,15 +94,32 @@ instance Ord a => Monoid (TreeVector a) where
   mappend = (<>)
   mempty = TreeVector mempty
 
-getVector :: TreeVector a -> [a]
+instance (Show a, Ord a) => CRDT (TreeVector a) where
+  type External (TreeVector a) = [a]
+
+  query = getVector
+
+  mkPatch :: Client -> TreeVector a -> [a] -> TreeVector a
+  mkPatch client old new = mkPatch' client old new
+
+  score (TreeVector m) = sum $ map nodeScore $ toList m
+    where
+      nodeScore (Node l c r) = score l + elementScore c + score r
+
+      elementScore = \ case
+        Set _ -> 0
+        Deleted -> 1
+
+getVector :: (Show a, Ord a) => TreeVector a -> [a]
 getVector (TreeVector m) =
   concatMap (getNodeVector . snd) $ toAscList m
 
-treeLength :: TreeVector a -> Int
+treeLength :: (Show a, Ord a) => TreeVector a -> Int
 treeLength = length . getVector
 
-mkPatch :: forall a . Ord a => Client -> TreeVector a -> [a] -> TreeVector a
-mkPatch client tree s =
+mkPatch' :: forall a . (Show a, Ord a) =>
+  Client -> TreeVector a -> [a] -> TreeVector a
+mkPatch' client tree s =
   foldl' treeAdd tree (diff (getVector tree) s)
   where
     treeAdd :: TreeVector a -> Edit a -> TreeVector a

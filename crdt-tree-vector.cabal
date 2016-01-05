@@ -18,6 +18,7 @@ library
     , containers
     , vector
   exposed-modules:
+      CRDT.Class
       CRDT.TreeVector
       CRDT.TreeVector.Internal
       CRDT.TreeVector.Internal.Edit
@@ -45,6 +46,7 @@ test-suite spec
   other-modules:
       CRDT.TreeVector.InternalSpec
       Test.Utils
+      CRDT.Class
       CRDT.TreeVector
       CRDT.TreeVector.Internal
       CRDT.TreeVector.Internal.Edit

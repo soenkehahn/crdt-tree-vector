@@ -18,6 +18,7 @@ import           Test.QuickCheck
 import           Test.QuickCheck.Checkers
 import           Test.QuickCheck.Classes
 
+import           CRDT.Class
 import           CRDT.TreeVector ()
 import           CRDT.TreeVector.Internal
 import           Test.Utils
@@ -28,7 +29,7 @@ spec = do
   isSemilattice (Proxy :: Proxy (Node Char))
 
   describe "TreeVector" $ do
-    isSemilattice (Proxy :: Proxy (TreeVector Char))
+    isCRDT (Proxy :: Proxy (TreeVector Char))
     testBatch (monoid (undefined :: TreeVector Char))
 
     it "joins are commutative" $ do
@@ -37,7 +38,7 @@ spec = do
 
   describe "mkPatch" $ do
     it "can create concurrent patches for two clients" $ do
-      let initial = mempty
+      let initial = mempty :: TreeVector Char
           patchA = mkPatch (Client 1) initial "abc"
           patchB = mkPatch (Client 2) initial "xyz"
       getVector (patchA <> patchB) `shouldBe` "abcxyz"
