@@ -14,7 +14,6 @@ class Semigroup crdt => CRDT crdt where
   type External crdt :: *
   query :: crdt -> External crdt
   mkPatch :: Client -> crdt -> External crdt -> crdt
-  score :: crdt -> Integer
 
 update :: CRDT crdt => Client -> crdt -> External crdt -> crdt
 update client old new =

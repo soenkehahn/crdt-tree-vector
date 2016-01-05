@@ -41,28 +41,28 @@ spec = do
       let initial = mempty :: TreeVector Char
           patchA = mkPatch (Client 1) initial "abc"
           patchB = mkPatch (Client 2) initial "xyz"
-      getVector (patchA <> patchB) `shouldBe` "abcxyz"
+      query (patchA <> patchB) `shouldBe` "abcxyz"
 
     it "can create concurrent deletions for two clients" $ do
-      let initial = mempty
+      let initial = mempty :: TreeVector Char
           patchA = mkPatch (Client 1) initial "abc"
           patchB = mkPatch (Client 1) patchA "ab"
           patchC = mkPatch (Client 2) initial "xyz"
-      getVector (patchB <> patchC) `shouldBe` "abxyz"
+      query (patchB <> patchC) `shouldBe` "abxyz"
 
     it "can create concurrent deletions for two clients" $ do
-      let initial = mempty
+      let initial = mempty :: TreeVector Char
           patchA = mkPatch (Client 1) initial "abc"
           patchB = mkPatch (Client 2) initial "xyz"
           patchC = patchA <> patchB
           patchD = mkPatch (Client 1) patchC "abxz"
-      getVector (patchB <> patchD) `shouldBe` "abxz"
+      query (patchB <> patchD) `shouldBe` "abxz"
 
     it "can create patch documents" $ do
       property $ \ (tree :: TreeVector Char) s ->
-        counterexample (show (getVector tree)) $
-        counterexample (show (diff (getVector tree) s)) $
-        getVector (tree <> mkPatch (Client 1) tree s) === s
+        counterexample (show (query tree)) $
+        counterexample (show (diff (query tree) s)) $
+        query (tree <> mkPatch (Client 1) tree s) === s
 
 instance Arbitrary (Element Char) where
   arbitrary = oneof $
@@ -95,4 +95,4 @@ instance Arbitrary (TreeVector Char) where
   shrink (TreeVector m) = map TreeVector $ shrink m
 
 instance EqProp (TreeVector Char) where
-  a =-= b = getVector a === getVector b
+  a =-= b = query a === query b

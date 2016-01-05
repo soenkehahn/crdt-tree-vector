@@ -14,7 +14,6 @@ module CRDT.TreeVector.Internal (
   getNodeVector,
 
   TreeVector(..),
-  getVector,
 
   diff,
 ) where
@@ -34,7 +33,7 @@ import           CRDT.TreeVector.Internal.Edit
 data Element a where
   Set :: a -> Element a
   Deleted :: Element a
-  deriving (Show, Eq, Generic, Typeable)
+  deriving (Show, Eq, Ord, Generic, Typeable)
 
 instance Ord a => Semigroup (Element a) where
   Deleted <> _ = Deleted
@@ -46,27 +45,11 @@ get = \ case
   Set c -> [c]
   Deleted -> []
 
--- fixme
-{- instance (Show a, Ord a) => CRDT (Element a) where
-  type External (Element a) = Maybe a
-
-
-  mkPatch _ (Set old) (Just new)
-    | old == new = Right $ Set old
-  mkPatch _ (Set _) Nothing = Right Deleted
-  mkPatch _ Deleted Nothing = Right Deleted
-  mkPatch _ (Set _) (Just _) = Left "cannot change Element" -- fixme
-  mkPatch _ Deleted _ = Left "cannot un-delete Element" -- fixme
-
-  score = \ case
-    Set _ -> 0
-    Deleted -> 1 -}
-
 -- * trees
 
 data Node a
   = Node (TreeVector a) (Element a) (TreeVector a)
-  deriving (Show, Eq, Generic, Typeable)
+  deriving (Show, Eq, Ord, Generic, Typeable)
 
 instance Ord a => Semigroup (Node a) where
   (Node l1 c1 r1) <> (Node l2 c2 r2) =
@@ -84,7 +67,7 @@ nodeLength = length . getNodeVector
 
 data TreeVector a
   = TreeVector (Map Client (Node a))
-  deriving (Show, Eq, Generic, Typeable)
+  deriving (Show, Eq, Ord, Generic, Typeable)
 
 instance Ord a => Semigroup (TreeVector a) where
   TreeVector a <> TreeVector b =
@@ -101,14 +84,6 @@ instance (Show a, Ord a) => CRDT (TreeVector a) where
 
   mkPatch :: Client -> TreeVector a -> [a] -> TreeVector a
   mkPatch client old new = mkPatch' client old new
-
-  score (TreeVector m) = sum $ map nodeScore $ toList m
-    where
-      nodeScore (Node l c r) = score l + elementScore c + score r
-
-      elementScore = \ case
-        Set _ -> 0
-        Deleted -> 1
 
 getVector :: (Show a, Ord a) => TreeVector a -> [a]
 getVector (TreeVector m) =
