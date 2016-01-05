@@ -24,11 +24,11 @@ import           Test.Utils
 
 spec :: Spec
 spec = do
-  isSemigroup (Proxy :: Proxy (Element Char))
-  isSemigroup (Proxy :: Proxy (Node Char))
+  isSemilattice (Proxy :: Proxy (Element Char))
+  isSemilattice (Proxy :: Proxy (Node Char))
 
   describe "TreeVector" $ do
-    isSemigroup (Proxy :: Proxy (TreeVector Char))
+    isSemilattice (Proxy :: Proxy (TreeVector Char))
     testBatch (monoid (undefined :: TreeVector Char))
 
     it "joins are commutative" $ do
