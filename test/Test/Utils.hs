@@ -8,12 +8,6 @@ import           Data.Typeable
 import           Test.Hspec
 import           Test.QuickCheck
 
-isSemigroup :: forall a . (Eq a, Show a, Typeable a, Arbitrary a, Semigroup a) =>
-  Proxy a -> Spec
-isSemigroup proxy = do
-  describe (show (typeRep proxy) ++ " is a lawful Semigroup") $ do
-    associativity proxy
-
 isSemilattice :: forall a . (Eq a, Show a, Typeable a, Arbitrary a, Semigroup a) =>
   Proxy a -> Spec
 isSemilattice proxy = do
