@@ -4,7 +4,7 @@
 
 {-# OPTIONS_GHC -fno-warn-orphans #-}
 
-module CRDT.TreeVector.InternalSpec where
+module Data.Crdt.TreeVector.InternalSpec where
 
 import           Prelude ()
 import           Prelude.Compat
@@ -18,8 +18,8 @@ import           Test.QuickCheck
 import           Test.QuickCheck.Checkers
 import           Test.QuickCheck.Classes
 
-import           CRDT.TreeVector ()
-import           CRDT.TreeVector.Internal
+import           Data.Crdt.TreeVector ()
+import           Data.Crdt.TreeVector.Internal
 import           Test.Utils
 
 spec :: Spec

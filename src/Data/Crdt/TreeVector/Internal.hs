@@ -3,7 +3,7 @@
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 
-module CRDT.TreeVector.Internal (
+module Data.Crdt.TreeVector.Internal (
   Element(..),
   get,
 
@@ -25,7 +25,7 @@ import           Data.Semigroup hiding (diff)
 import           Data.Typeable
 import           GHC.Generics
 
-import           CRDT.TreeVector.Internal.Edit
+import           Data.Crdt.TreeVector.Internal.Edit
 
 -- * characters
 
