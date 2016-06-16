@@ -95,6 +95,7 @@ mkPatch client tree s =
     treeAdd (TreeVector tree) edit = TreeVector $
       Map.fromList $ mapAdd (toAscList tree) edit
 
+    mapAdd :: [(Client, Node a)] -> Edit a -> [(Client, Node a)]
     mapAdd [] (Insert 0 c) = [(client, mkNode c)]
     mapAdd [(client, sub)] edit = [(client, nodeAdd sub edit)]
     mapAdd m edit = mapAddMult m edit
