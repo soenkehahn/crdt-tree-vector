@@ -19,8 +19,10 @@ library
     , vector
   exposed-modules:
       Data.Crdt.TreeVector
+      Data.Crdt.TreeVector.Cursor
       Data.Crdt.TreeVector.Internal
       Data.Crdt.TreeVector.Internal.Edit
+      Data.Crdt.TreeVector.Pretty
   default-language: Haskell2010
 
 test-suite spec
@@ -42,10 +44,14 @@ test-suite spec
     , checkers
     , hspec-checkers
     , quickcheck-instances
+    , deepseq
   other-modules:
+      Data.Crdt.TreeVector.CursorSpec
       Data.Crdt.TreeVector.InternalSpec
       Test.Utils
       Data.Crdt.TreeVector
+      Data.Crdt.TreeVector.Cursor
       Data.Crdt.TreeVector.Internal
       Data.Crdt.TreeVector.Internal.Edit
+      Data.Crdt.TreeVector.Pretty
   default-language: Haskell2010

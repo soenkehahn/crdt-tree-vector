@@ -27,3 +27,4 @@ tests:
       - checkers
       - hspec-checkers
       - quickcheck-instances
+      - deepseq

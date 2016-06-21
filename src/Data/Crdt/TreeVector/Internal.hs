@@ -1,4 +1,5 @@
 {-# LANGUAGE DeriveDataTypeable #-}
+{-# LANGUAGE DeriveFunctor #-}
 {-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE ScopedTypeVariables #-}
@@ -9,10 +10,12 @@ module Data.Crdt.TreeVector.Internal (
 
   Node(..),
   getNodeVector,
+  nodeLength,
 
   Client(..),
   TreeVector(..),
   getVector,
+  treeLength,
 
   mkPatch,
   diff,
@@ -32,7 +35,7 @@ import           Data.Crdt.TreeVector.Internal.Edit
 data Element a
   = Set a
   | Deleted
-  deriving (Show, Eq, Generic, Typeable)
+  deriving (Show, Eq, Generic, Typeable, Functor)
 
 instance Ord a => Semigroup (Element a) where
   Deleted <> _ = Deleted
@@ -52,7 +55,7 @@ data Client
 
 data Node a
   = Node (TreeVector a) (Element a) (TreeVector a)
-  deriving (Show, Eq, Generic, Typeable)
+  deriving (Show, Eq, Generic, Typeable, Functor)
 
 instance Ord a => Semigroup (Node a) where
   (Node l1 c1 r1) <> (Node l2 c2 r2) =
@@ -69,8 +72,10 @@ nodeLength :: Node a -> Int
 nodeLength = length . getNodeVector
 
 data TreeVector a
-  = TreeVector (Map Client (Node a))
-  deriving (Show, Eq, Generic, Typeable)
+  = TreeVector {
+    treeMap :: (Map Client (Node a))
+  }
+  deriving (Show, Eq, Generic, Typeable, Functor)
 
 instance Ord a => Semigroup (TreeVector a) where
   TreeVector a <> TreeVector b =
