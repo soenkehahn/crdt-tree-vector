@@ -3,6 +3,7 @@
 {-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE ScopedTypeVariables #-}
+{-# LANGUAGE TupleSections #-}
 
 module Data.Crdt.TreeVector.Internal (
   Element(..),
@@ -15,6 +16,7 @@ module Data.Crdt.TreeVector.Internal (
   Client(..),
   TreeVector(..),
   getVector,
+  getVectorWithClients,
   treeLength,
 
   mkPatch,
@@ -68,6 +70,13 @@ getNodeVector :: Node clientId a -> [a]
 getNodeVector (Node left c right) =
   getVector left ++ get c ++ getVector right
 
+getNodeVectorWithClients :: Client clientId -> Node clientId a
+  -> [(Client clientId, a)]
+getNodeVectorWithClients client (Node left c right) =
+  getVectorWithClients left ++
+  fmap (client,) (get c) ++
+  getVectorWithClients right
+
 nodeLength :: Node clientId a -> Int
 nodeLength = length . getNodeVector
 
@@ -86,8 +95,12 @@ instance (Ord clientId, Ord a) => Monoid (TreeVector clientId a) where
   mempty = TreeVector mempty
 
 getVector :: TreeVector clientId a -> [a]
-getVector (TreeVector m) =
-  concatMap (getNodeVector . snd) $ toAscList m
+getVector =
+  fmap snd . getVectorWithClients
+
+getVectorWithClients :: TreeVector clientId a -> [(Client clientId, a)]
+getVectorWithClients (TreeVector m) =
+  concatMap (uncurry getNodeVectorWithClients) $ toAscList m
 
 treeLength :: TreeVector clientId a -> Int
 treeLength = length . getVector
