@@ -11,6 +11,7 @@ import           Test.QuickCheck
 import           Data.Crdt.TreeVector
 import           Data.Crdt.TreeVector.Cursor
 import           Data.Crdt.TreeVector.Pretty
+import           Data.Crdt.TreeVector.InternalSpec (mkClient)
 
 spec :: Spec
 spec = do
@@ -26,65 +27,65 @@ spec = do
     context "when an element gets inserted" $ do
       it "moves the index on an earlier insert" $ do
         let original = "foobar"
-            doc = mkPatch (Client 0) mempty original
+            doc = mkPatch (mkClient 0) mempty original
             cursor = toCursor doc 3
-            newDoc = mkPatch (Client 0) doc "fxoobar"
+            newDoc = mkPatch (mkClient 0) doc "fxoobar"
             newCursor = fromCursor newDoc cursor
         newCursor `shouldBe` 4
 
       it "retains the index on a later insert" $ do
         let original = "foobar"
-            doc = mkPatch (Client 0) mempty original
+            doc = mkPatch (mkClient 0) mempty original
             cursor = toCursor doc 3
-            newDoc = mkPatch (Client 0) doc "foobaxr"
+            newDoc = mkPatch (mkClient 0) doc "foobaxr"
             newCursor = fromCursor newDoc cursor
         newCursor `shouldBe` 3
 
       it "retains the index if an element gets inserted at the cursor's position" $ do
         let original = "foobar"
-            doc = mkPatch (Client 0) mempty original
+            doc = mkPatch (mkClient 0) mempty original
             cursor = toCursor doc 3
-            newDoc = mkPatch (Client 1) doc "fooxbar"
+            newDoc = mkPatch (mkClient 1) doc "fooxbar"
             newCursor = fromCursor newDoc cursor
         newCursor `shouldBe` 4 -- fixme
 
     context "when an element gets deleted" $ do
       it "gets decreased on earlier deletions" $ do
         let original = "fooxbar"
-            doc = mkPatch (Client 0) mempty original
+            doc = mkPatch (mkClient 0) mempty original
             cursor = toCursor doc 5
-            newDoc = mkPatch (Client 0) doc "foobar"
+            newDoc = mkPatch (mkClient 0) doc "foobar"
             newCursor = fromCursor newDoc cursor
         newCursor `shouldBe` 4
 
       it "stays the same on later deletions" $ do
         let original = "fooxbar"
-            doc = mkPatch (Client 0) mempty original
+            doc = mkPatch (mkClient 0) mempty original
             cursor = toCursor doc 1
-            newDoc = mkPatch (Client 0) doc "foobar"
+            newDoc = mkPatch (mkClient 0) doc "foobar"
             newCursor = fromCursor newDoc cursor
         newCursor `shouldBe` 1
 
       it "works when it points to an element that gets deleted" $ do
         let original = "fooxbar"
-            doc = mkPatch (Client 0) mempty original
+            doc = mkPatch (mkClient 0) mempty original
             cursor = toCursor doc 3
-            newDoc = mkPatch (Client 0) doc "foobar"
+            newDoc = mkPatch (mkClient 0) doc "foobar"
             newCursor = fromCursor newDoc cursor
         newCursor `shouldBe` 3
 
     it "allows to set the cursor for an empty document" $ do
-      let empty = mempty :: TreeVector Int
+      let empty = mempty :: TreeVector Int Char
           cursor = toCursor empty 0
       fromCursor empty cursor `shouldBe` 0
 
     it "allows to set the cursor after the last element" $ do
-      let doc = mkPatch (Client 0) mempty "foo"
+      let doc = mkPatch (mkClient 0) mempty "foo"
           cursor = toCursor doc 3
       fromCursor doc cursor `shouldBe` 3
 
     it "allows to set the cursor before the first element" $ do
-      let doc = mkPatch (Client 0) mempty "foo"
+      let doc = mkPatch (mkClient 0) mempty "foo"
           cursor = toCursor doc 0
       fromCursor doc cursor `shouldBe` 0
 
@@ -93,30 +94,13 @@ spec = do
       forAllDocs $ \ b -> \ index -> do
         evaluate $ rnf $ fromCursor b $ toCursor a index
 
-data WithIndex
-  = WithIndex {
-    vector :: String,
-    index :: Int
-  }
-  deriving Show
-
-instance Arbitrary WithIndex where
-  arbitrary = do
-    vector <- listOf1 arbitrary
-    n <- arbitrary
-    return $ WithIndex vector (abs n `mod` (length vector + 1))
-  shrink (WithIndex l n) =
-    filter (\ (WithIndex l _) -> not (null l)) $
-      map (\ l' -> WithIndex l' (min n (pred (length l')))) (shrink l) ++
-      map (\ n' -> WithIndex l (max 0 n')) (shrink n)
-
-forAllDocs :: Testable t => (TreeVector Char -> t) -> Property
+forAllDocs :: Testable t => (TreeVector Int Char -> t) -> Property
 forAllDocs prop = property $ \ (vectors :: [String]) ->
-  let doc = foldl' (\ doc new -> mkPatch (Client 0) doc new) mempty vectors
+  let doc = foldl' (\ doc new -> mkPatch (mkClient 0) doc new) mempty vectors
   in counterexample (ppTree doc) $
     prop doc
 
-forAllIndices :: Testable t => TreeVector a -> (Int -> t) -> Property
+forAllIndices :: Testable t => TreeVector Int a -> (Int -> t) -> Property
 forAllIndices doc prop =
   forAllShrink gen shr prop
   where

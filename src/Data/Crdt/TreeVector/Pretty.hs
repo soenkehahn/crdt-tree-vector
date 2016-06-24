@@ -8,15 +8,15 @@ import qualified Data.Tree as DT
 
 import           Data.Crdt.TreeVector.Internal
 
-ppTree :: Show a => TreeVector a -> String
+ppTree :: Show a => TreeVector clientId a -> String
 ppTree = DT.drawTree . convertTreeVector
 
-convertTreeVector :: Show a => TreeVector a -> DT.Tree String
+convertTreeVector :: Show a => TreeVector clientId a -> DT.Tree String
 convertTreeVector (TreeVector tree) = DT.Node
   (if Data.Map.null tree then "{}" else "TreeVector")
   (map (convertNode . snd) (toAscList tree))
 
-convertNode :: Show a => Node a -> DT.Tree String
+convertNode :: Show a => Node clientId a -> DT.Tree String
 convertNode (Node left e right) = DT.Node
   "Node"
   [convertTreeVector left, convertElement e, convertTreeVector right]

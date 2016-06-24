@@ -49,63 +49,66 @@ get = \ case
 
 -- * trees
 
-data Client
-  = Client Integer
+data Client clientId
+  = Client clientId
   deriving (Show, Eq, Ord, Generic)
 
-data Node a
-  = Node (TreeVector a) (Element a) (TreeVector a)
+data Node clientId a
+  = Node (TreeVector clientId a) (Element a) (TreeVector clientId a)
   deriving (Show, Eq, Generic, Typeable, Functor)
 
-instance Ord a => Semigroup (Node a) where
+instance (Ord clientId, Ord a) => Semigroup (Node clientId a) where
   (Node l1 c1 r1) <> (Node l2 c2 r2) =
     Node (l1 <> l2) (c1 <> c2) (r1 <> r2)
 
-mkNode :: Ord a => a -> Node a
+mkNode :: (Ord clientId, Ord a) => a -> Node clientId a
 mkNode c = Node mempty (Set c) mempty
 
-getNodeVector :: Node a -> [a]
+getNodeVector :: Node clientId a -> [a]
 getNodeVector (Node left c right) =
   getVector left ++ get c ++ getVector right
 
-nodeLength :: Node a -> Int
+nodeLength :: Node clientId a -> Int
 nodeLength = length . getNodeVector
 
-data TreeVector a
+data TreeVector clientId a
   = TreeVector {
-    treeMap :: (Map Client (Node a))
+    treeMap :: (Map (Client clientId) (Node clientId a))
   }
   deriving (Show, Eq, Generic, Typeable, Functor)
 
-instance Ord a => Semigroup (TreeVector a) where
+instance (Ord clientId, Ord a) => Semigroup (TreeVector clientId a) where
   TreeVector a <> TreeVector b =
     TreeVector $ unionWith (<>) a b
 
-instance Ord a => Monoid (TreeVector a) where
+instance (Ord clientId, Ord a) => Monoid (TreeVector clientId a) where
   mappend = (<>)
   mempty = TreeVector mempty
 
-getVector :: TreeVector a -> [a]
+getVector :: TreeVector clientId a -> [a]
 getVector (TreeVector m) =
   concatMap (getNodeVector . snd) $ toAscList m
 
-treeLength :: TreeVector a -> Int
+treeLength :: TreeVector clientId a -> Int
 treeLength = length . getVector
 
-mkPatch :: forall a . Ord a => Client -> TreeVector a -> [a] -> TreeVector a
+mkPatch :: forall clientId a . (Ord clientId, Ord a) =>
+  Client clientId -> TreeVector clientId a -> [a] -> TreeVector clientId a
 mkPatch client tree s =
   foldl' treeAdd tree (diff (getVector tree) s)
   where
-    treeAdd :: TreeVector a -> Edit a -> TreeVector a
+    treeAdd :: TreeVector clientId a -> Edit a -> TreeVector clientId a
     treeAdd (TreeVector tree) edit = TreeVector $
       Map.fromList $ mapAdd (toAscList tree) edit
 
-    mapAdd :: [(Client, Node a)] -> Edit a -> [(Client, Node a)]
+    mapAdd :: [(Client clientId, Node clientId a)] -> Edit a
+      -> [(Client clientId, Node clientId a)]
     mapAdd [] (Insert 0 c) = [(client, mkNode c)]
     mapAdd [(client, sub)] edit = [(client, nodeAdd sub edit)]
     mapAdd m edit = mapAddMult m edit
 
-    mapAddMult :: [(Client, Node a)] -> Edit a -> [(Client, Node a)]
+    mapAddMult :: [(Client clientId, Node clientId a)] -> Edit a
+      -> [(Client clientId, Node clientId a)]
     mapAddMult [(client, node)] edit=
       [(client, nodeAdd node edit)]
     mapAddMult ((client, a) : r) edit
@@ -116,7 +119,7 @@ mkPatch client tree s =
     mapAddMult [] (Insert 0 _) = error "hole" -- fixme
     mapAddMult _ _ = error $ show "mapAddMult"
 
-    nodeAdd :: Node a -> Edit a -> Node a
+    nodeAdd :: Node clientId a -> Edit a -> Node clientId a
     nodeAdd (Node left c right) edit
       | index edit < treeLength left =
         Node (treeAdd left edit) c right
