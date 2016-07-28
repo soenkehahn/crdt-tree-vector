@@ -17,6 +17,7 @@ library
     , semigroups
     , containers
     , vector
+    , deepseq
   exposed-modules:
       Data.Crdt.TreeVector
       Data.Crdt.TreeVector.Cursor
@@ -38,6 +39,7 @@ test-suite spec
     , semigroups
     , containers
     , vector
+    , deepseq
     , base-compat
     , hspec
     , QuickCheck

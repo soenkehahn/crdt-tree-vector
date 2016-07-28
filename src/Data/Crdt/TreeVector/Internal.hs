@@ -23,6 +23,7 @@ module Data.Crdt.TreeVector.Internal (
   diff,
 ) where
 
+import           Control.DeepSeq
 import           Data.List
 import           Data.Map (Map, toAscList, unionWith)
 import qualified Data.Map as Map
@@ -38,6 +39,8 @@ data Element a
   = Set a
   | Deleted
   deriving (Show, Eq, Generic, Typeable, Functor)
+
+instance NFData a => NFData (Element a)
 
 instance Ord a => Semigroup (Element a) where
   Deleted <> _ = Deleted
@@ -55,9 +58,13 @@ data Client clientId
   = Client clientId
   deriving (Show, Eq, Ord, Generic)
 
+instance NFData clientId => NFData (Client clientId)
+
 data Node clientId a
   = Node (TreeVector clientId a) (Element a) (TreeVector clientId a)
   deriving (Show, Eq, Generic, Typeable, Functor)
+
+instance (NFData clientId, NFData a) => NFData (Node clientId a)
 
 instance (Ord clientId, Ord a) => Semigroup (Node clientId a) where
   (Node l1 c1 r1) <> (Node l2 c2 r2) =
@@ -85,6 +92,8 @@ data TreeVector clientId a
     treeMap :: (Map (Client clientId) (Node clientId a))
   }
   deriving (Show, Eq, Generic, Typeable, Functor)
+
+instance (NFData clientId, NFData a) => NFData (TreeVector clientId a)
 
 instance (Ord clientId, Ord a) => Semigroup (TreeVector clientId a) where
   TreeVector a <> TreeVector b =
