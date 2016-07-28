@@ -57,3 +57,26 @@ test-suite spec
       Data.Crdt.TreeVector.Internal.Edit
       Data.Crdt.TreeVector.Pretty
   default-language: Haskell2010
+
+benchmark benchmarks
+  type: exitcode-stdio-1.0
+  main-is: Benchmarks.hs
+  hs-source-dirs:
+      benchmarks
+    , src
+  ghc-options: -Wall -fno-warn-name-shadowing -O1
+  build-depends:
+      base
+    , edit-distance-vector
+    , semigroups
+    , containers
+    , vector
+    , deepseq
+    , criterion
+  other-modules:
+      Data.Crdt.TreeVector
+      Data.Crdt.TreeVector.Cursor
+      Data.Crdt.TreeVector.Internal
+      Data.Crdt.TreeVector.Internal.Edit
+      Data.Crdt.TreeVector.Pretty
+  default-language: Haskell2010

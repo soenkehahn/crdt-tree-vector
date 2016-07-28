@@ -30,3 +30,13 @@ tests:
       - hspec-checkers
       - quickcheck-instances
       - deepseq
+
+benchmarks:
+  benchmarks:
+    main: Benchmarks.hs
+    source-dirs:
+      - benchmarks
+      - src
+    ghc-options: -O1
+    dependencies:
+      - criterion
