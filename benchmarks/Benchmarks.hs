@@ -8,7 +8,8 @@ import           Data.Crdt.TreeVector
 
 main :: IO ()
 main = defaultMainWith config $
-  bench "testStrings" (nf testDocument testStrings) :
+  bench "updates" (nf mkTestDocument testStrings) :
+  bench "merge with the same document" (nf (\ a -> a <> a) testDocument) :
   []
   where
     config = defaultConfig{
@@ -23,6 +24,9 @@ testStrings =
   "brave new world" :
   []
 
-testDocument :: [String] -> TreeVector Int Char
-testDocument docs =
+mkTestDocument :: [String] -> TreeVector Int Char
+mkTestDocument docs =
   foldl' (\ doc new -> doc <> mkPatch (Client 0) doc new) mempty docs
+
+testDocument :: TreeVector Int Char
+testDocument = mkTestDocument testStrings
