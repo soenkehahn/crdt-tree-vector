@@ -16,7 +16,7 @@ import           Data.Crdt.TreeVector.Pretty
 
 spec :: Spec
 spec = do
-  modifyMaxSize (const 50) $ do
+  modifyMaxSize (min 50) $ do
     describe "Cursor" $ do
       it "stays the same when nothing gets merged" $
         forAllDocs $ \ doc ->
