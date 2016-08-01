@@ -11,6 +11,7 @@ import           Prelude.Compat
 
 import           "quickcheck-instances" Test.QuickCheck.Instances ()
 import           Control.Monad
+import           Data.List
 import           Data.Proxy
 import           Data.Semigroup hiding (diff)
 import           Test.Hspec
@@ -110,7 +111,11 @@ instance EqProp (Node Int Char) where
   a =-= b = getNodeVector a === getNodeVector b
 
 instance Arbitrary (TreeVector Int Char) where
-  arbitrary = treeVector <$> arbitrary
+  arbitrary = do
+    texts :: [(Client Int, String)] <- arbitrary
+    return $ foldl'
+      (\ acc (client, new) -> acc <> mkPatch client acc new)
+      mempty texts
   shrink (TreeVector m _) = map treeVector $ shrink m
 
 instance EqProp (TreeVector Int Char) where
