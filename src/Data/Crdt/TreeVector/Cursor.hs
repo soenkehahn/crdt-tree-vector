@@ -88,7 +88,7 @@ class FromCursor a cursor where
   from :: a -> cursor -> Int
 
 instance Eq clientId => FromCursor (TreeVector clientId a) (MapCursor clientId) where
-  from (TreeVector tree) cursor = from tree cursor
+  from (TreeVector tree _) cursor = from tree cursor
 
 instance Eq clientId => FromCursor (Map (Client clientId) (Node clientId a)) (MapCursor clientId) where
   from m = from (toAscList m)

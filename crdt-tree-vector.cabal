@@ -18,6 +18,7 @@ library
     , containers
     , vector
     , deepseq
+    , hashable
   exposed-modules:
       Data.Crdt.TreeVector
       Data.Crdt.TreeVector.Cursor
@@ -31,7 +32,6 @@ test-suite spec
   main-is: Spec.hs
   hs-source-dirs:
       test
-    , src
   ghc-options: -Wall -fno-warn-name-shadowing
   build-depends:
       base
@@ -40,6 +40,7 @@ test-suite spec
     , containers
     , vector
     , deepseq
+    , hashable
     , base-compat
     , hspec
     , QuickCheck
@@ -47,15 +48,11 @@ test-suite spec
     , hspec-checkers
     , quickcheck-instances
     , deepseq
+    , crdt-tree-vector
   other-modules:
       Data.Crdt.TreeVector.CursorSpec
       Data.Crdt.TreeVector.InternalSpec
       Test.Utils
-      Data.Crdt.TreeVector
-      Data.Crdt.TreeVector.Cursor
-      Data.Crdt.TreeVector.Internal
-      Data.Crdt.TreeVector.Internal.Edit
-      Data.Crdt.TreeVector.Pretty
   default-language: Haskell2010
 
 benchmark benchmarks
@@ -72,6 +69,7 @@ benchmark benchmarks
     , containers
     , vector
     , deepseq
+    , hashable
     , criterion
   other-modules:
       Data.Crdt.TreeVector

@@ -12,7 +12,7 @@ ppTree :: Show a => TreeVector clientId a -> String
 ppTree = DT.drawTree . convertTreeVector
 
 convertTreeVector :: Show a => TreeVector clientId a -> DT.Tree String
-convertTreeVector (TreeVector tree) = DT.Node
+convertTreeVector (TreeVector tree _) = DT.Node
   (if Data.Map.null tree then "{}" else "TreeVector")
   (map (convertNode . snd) (toAscList tree))
 

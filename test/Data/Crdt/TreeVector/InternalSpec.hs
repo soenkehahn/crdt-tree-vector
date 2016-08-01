@@ -10,6 +10,7 @@ import           Prelude ()
 import           Prelude.Compat
 
 import           "quickcheck-instances" Test.QuickCheck.Instances ()
+import           Control.Monad
 import           Data.Proxy
 import           Data.Semigroup hiding (diff)
 import           Test.Hspec
@@ -34,6 +35,22 @@ spec = do
     it "joins are commutative" $ do
       property $ \ (a :: TreeVector Int Char) b ->
         a <> b === b <> a
+
+    describe "treeVectorHash" $ do
+      it "always hashes the contained map" $ do
+        let hasValidHashes :: TreeVector Int Char -> IO ()
+            hasValidHashes a = do
+              treeVectorHash a `shouldBe` mapHash (treeMap a)
+              forM_ (treeMap a) $ \ (Node left _ right) -> do
+                hasValidHashes left
+                hasValidHashes right
+        property $ \ (a :: TreeVector Int Char) -> do
+          hasValidHashes a
+
+      it "doesn't produce lots of hash clashes" $ do
+        property $ \ (a :: TreeVector Int Char) b -> do
+          when (treeMap a /= treeMap b) $
+            treeVectorHash a `shouldNotBe` treeVectorHash b
 
   describe "mkPatch" $ do
     it "can create concurrent patches for two clients" $ do
@@ -93,8 +110,8 @@ instance EqProp (Node Int Char) where
   a =-= b = getNodeVector a === getNodeVector b
 
 instance Arbitrary (TreeVector Int Char) where
-  arbitrary = TreeVector <$> arbitrary
-  shrink (TreeVector m) = map TreeVector $ shrink m
+  arbitrary = treeVector <$> arbitrary
+  shrink (TreeVector m _) = map treeVector $ shrink m
 
 instance EqProp (TreeVector Int Char) where
   a =-= b = getVector a === getVector b

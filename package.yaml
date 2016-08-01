@@ -8,6 +8,7 @@ dependencies:
   - containers
   - vector
   - deepseq
+  - hashable
 
 ghc-options:
   -Wall -fno-warn-name-shadowing
@@ -21,7 +22,6 @@ tests:
     main: Spec.hs
     source-dirs:
       - test
-      - src
     dependencies:
       - base-compat
       - hspec
@@ -30,6 +30,7 @@ tests:
       - hspec-checkers
       - quickcheck-instances
       - deepseq
+      - crdt-tree-vector
 
 benchmarks:
   benchmarks:
